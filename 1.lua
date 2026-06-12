@@ -2446,8 +2446,8 @@ local function ESPTick()
     end
 
     if not crowded and HUD and currentPawn then
-        HUD:AddDebugText(string.format("BOT : %d     PLAYER : %d", botCount, playerCount), currentPawn, 1, {X=0,Y=0,Z=170}, {X=0,Y=0,Z=170}, {R=255,G=255,B=255,A=255}, true, false, true, nil, 1.0, true)
-        HUD:AddDebugText("MOD BY @ADITYA_ORG", currentPawn, 1, {X=0,Y=0,Z=145}, {X=0,Y=0,Z=145}, {R=255,G=200,B=0,A=255}, true, false, true, nil, 1.0, true)
+        HUD:AddDebugText(string.format("BOT : %d     PLAYER : %d", botCount, playerCount), currentPawn, 1, {X=0,Y=0,Z=170}, {X=0,Y=0,Z=155}, {R=255,G=100,B=200,A=255}, true, false, true, nil, 1.0, true)
+        HUD:AddDebugText("REAL DEVLOPER BUY @ADITYA_ORG", currentPawn, 1, {X=0,Y=0,Z=145}, {X=0,Y=0,Z=145}, {R=0,G=200,B=200,A=255}, true, false, true, nil, 1.0, true)
     end
 end
 
@@ -2737,12 +2737,13 @@ local function ApplyHardAimbot()
         entity.SwitchFromBackpackToIdleTime = 0.15
         entity.ShotGunHorizontalSpread = 0.0
         entity.ShotGunVerticalSpread = 0.0
-        entity.RecoilKick = 0.2 * (1 - strengthMul * 0.6)
+        entity.RecoilKick = 0.3 * (1 - strengthMul * 0.6)
         entity.RecoilKickADS = 0.2 * (1 - strengthMul * 0.6)
         entity.AnimationKick = 0.2 * (1 - strengthMul * 0.6)
         entity.AccessoriesVRecoilFactor = 0.6 * (1 - strengthMul * 0.4)
         entity.AccessoriesHRecoilFactor = 0.6 * (1 - strengthMul * 0.4)
         entity.GameDeviationFactor = 0.3 * (1 - strengthMul * 0.7)
+        entity.ExtraHitPerformScale = 50
         if entity.RecoilInfo then
             entity.RecoilInfo.VerticalRecoilMin = 0.2 * (1 - strengthMul * 0.5)
             entity.RecoilInfo.VerticalRecoilMax = 0.2 * (1 - strengthMul * 0.5)
