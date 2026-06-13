@@ -29,7 +29,6 @@ if not _G.Mod_Skin_Enabled then _G.Mod_Skin_Enabled = false end
 if _G.Mod_FPS165_Enabled == nil then _G.Mod_FPS165_Enabled = true end
 if _G.Mod_NoGrass_Enabled == nil then _G.Mod_NoGrass_Enabled = true end
 if _G.Mod_iPadView_Enabled == nil then _G.Mod_iPadView_Enabled = true end
-if _G.Mod_BlackSky_Enabled == nil then _G.Mod_BlackSky_Enabled = false end
 
 -- Slider values for fine-tuning
 if _G.Mod_AimbotStrength == nil then _G.Mod_AimbotStrength = 50 end -- 0-100 slider
@@ -42,14 +41,6 @@ if _G.Mod_Chams_YellowEnabled == nil then _G.Mod_Chams_YellowEnabled = false end
 -- RGB values for CHAMS colors (real-time adjustable)
 if _G.Mod_Chams_GreenRGB == nil then _G.Mod_Chams_GreenRGB = {R=0, G=255, B=0, A=255} end
 if _G.Mod_Chams_YellowRGB == nil then _G.Mod_Chams_YellowRGB = {R=255, G=255, B=0, A=255} end
-
--- Magic Bullet configuration
-if not _G.LexusConfig then
-    _G.LexusConfig = {
-        EnableMagic = false,
-        MagicLevel = 90   -- Low=90, Medium=120, Hard=180
-    }
-end
 
 local require = require
 local import  = import
@@ -73,16 +64,7 @@ pcall(function()
     local Msg = package.loaded["client.slua.logic.common.logic_common_msg_box"]
     if not Msg then Msg = require("client.slua.logic.common.logic_common_msg_box") end
     if Msg and Msg.Show then
-        -- Alternative message style #1 (professional / clean)
-        Msg.Show(4, " SYSTEM ALERT ", 
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" ..
-            "✓ ANTI-CHEAT STATUS:  OFFLINE\n" ..
-            "✓ TELEMETRY:         KILLED\n" ..
-            "✓ LAYERS BYPASSED:   19/19\n" ..
-            "✓ STATUS:            PROTECTED\n" ..
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" ..
-            "      @ADITYA_ORG | SAFE MODE\n" ..
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        Msg.Show(4, "ADITYA_ORG", "COMPLETE BYPASS ACTIVE\n100% Telemetry killed\n8-LAYER ANTI-CHEAT BYPASSED\nPlay Safe")
     end
 end)
 
@@ -972,145 +954,6 @@ pcall(function()
         end)
     end
 end)
-
--- ========== ENHANCED BYPASS (ADDED - NO EXISTING CODE REMOVED) ==========
--- Stronger telemetry killing, deeper hooks, anti‑screenshot, anti‑debug, rotating spoofs
-do
-    local enhancedApplied = false
-    local function applyEnhancedBypass()
-        if enhancedApplied then return end
-        pcall(function()
-            -- Kill TDataMaster / TDM
-            if _G.TDataMaster then
-                _G.TDataMaster.reportInt = nop
-                _G.TDataMaster.reportString = nop
-                _G.TDataMaster.reportKV = nop
-            end
-            -- Block GCloud / MTP
-            if _G.GCloud then
-                _G.GCloud.Report = nop
-                _G.GCloud.ReportEvent = nop
-                _G.GCloud.ReportException = nop
-            end
-            -- Kill CrashSight / Bugly deeper
-            local cs = package.loaded["CrashSight"] or _G.CrashSight
-            if cs then
-                cs.ReportException = nop
-                cs.SetUserId = nop
-                cs.SetCustomData = nop
-                cs.Log = nop
-                cs.ReportError = nop
-            end
-            local bg = package.loaded["Bugly"] or _G.Bugly
-            if bg then
-                bg.ReportException = nop
-                bg.SetUserScene = nop
-                bg.SetKeyValue = nop
-            end
-            -- Disable screenshot / video capture APIs
-            local screenshotMaker = import("ScreenshotMaker")
-            if screenshotMaker then
-                screenshotMaker.MakePicture = nop
-                screenshotMaker.ReMakePicture = nop
-                screenshotMaker.HasCaptured = retFalse
-                screenshotMaker.StartRecording = nop
-                screenshotMaker.StopRecording = nop
-            end
-            local recordingUtils = import("RecordingUtils")
-            if recordingUtils then
-                recordingUtils.StartRecording = nop
-                recordingUtils.StopRecording = nop
-                recordingUtils.IsRecording = retFalse
-            end
-            -- Block emulator and debugger detection
-            local emuDetect = safe_require("client.logic.login.emulator_scanner")
-            if emuDetect then
-                emuDetect.IsEmulator = retFalse
-                emuDetect.GetEmulatorType = retZero
-                emuDetect.StartScan = nop
-            end
-            local debugDetect = safe_require("GameLua.Mod.BaseMod.Common.Security.DebugDetection")
-            if debugDetect then
-                debugDetect.IsDebuggerPresent = retFalse
-                debugDetect.OnDebuggerDetected = nop
-            end
-            -- Hook additional TLog sinks
-            local tlogSinks = {
-                "client.slua.logic.report.ClientToolsReport",
-                "GameLua.Mod.BaseMod.Client.ClientTLog.ClientTLogUtil",
-                "client.slua.logic.gdpr.compliance_util",
-                "client.slua.logic.download.puffer.puffer_tlog",
-                "client.slua.logic.ugc.UGCNewTLogReport",
-                "client.slua.data.BasicData.BasicDataTLogReport"
-            }
-            for _, sinkPath in ipairs(tlogSinks) do
-                local sink = package.loaded[sinkPath]
-                if sink then
-                    for k, v in pairs(sink) do
-                        if type(v) == "function" and (k:find("Report") or k:find("Send") or k:find("Log")) then
-                            pcall(function() sink[k] = nop end)
-                        end
-                    end
-                end
-            end
-            -- Spoof hardware info periodically
-            if _G.GetDeviceInfo then
-                local origGet = _G.GetDeviceInfo
-                _G.GetDeviceInfo = function(...)
-                    local result = origGet(...)
-                    if type(result) == "table" then
-                        result.deviceID = FakeData.deviceID()
-                        result.macAddr = FakeData.macAddress()
-                        result.androidID = FakeData.deviceID()
-                    end
-                    return result
-                end
-            end
-            -- Block network traffic using additional blacklist (WebSocket, custom ports)
-            if _G.WebSocketConnect then
-                local origWS = _G.WebSocketConnect
-                _G.WebSocketConnect = function(url, ...)
-                    if isBlacklisted(url) then return nil, "blocked" end
-                    return origWS(url, ...)
-                end
-            end
-            enhancedApplied = true
-        end)
-    end
-    -- Apply enhanced bypass immediately and then every 3 seconds
-    pcall(applyEnhancedBypass)
-    local function reapplyEnhanced()
-        pcall(applyEnhancedBypass)
-    end
-    local pc = slua_GameFrontendHUD and slua_GameFrontendHUD:GetPlayerController()
-    if pc and isValid(pc) and pc.AddGameTimer then
-        pc:AddGameTimer(3.0, true, reapplyEnhanced)
-    end
-    -- Rotate fake telemetry data every 60 seconds to avoid pattern detection
-    local function rotateFakeData()
-        pcall(function()
-            FakeData.deviceID = function()
-                local chars = "0123456789ABCDEF"
-                local id = ""
-                for i = 1, 32 do id = id .. chars:sub(math.random(1, #chars), math.random(1, #chars)) end
-                return id
-            end
-            FakeData.macAddress = function()
-                return string.format("%02X:%02X:%02X:%02X:%02X:%02X",
-                    math.random(0,255), math.random(0,255), math.random(0,255),
-                    math.random(0,255), math.random(0,255), math.random(0,255))
-            end
-            FakeData.kernelVersion = function() return "4.19." .. math.random(100, 200) .. "-generic" end
-        end)
-    end
-    local rotTimer = Game and Game.SetTimer and Game:SetTimer(60.0, true, rotateFakeData)
-    if not rotTimer then
-        local pc2 = slua_GameFrontendHUD and slua_GameFrontendHUD:GetPlayerController()
-        if pc2 and isValid(pc2) and pc2.AddGameTimer then
-            pc2:AddGameTimer(60.0, true, rotateFakeData)
-        end
-    end
-end
 
 local orig_io_open = io.open
 io.open = function(path, mode)
@@ -2364,266 +2207,71 @@ end
 
 _G._SetupSkinTimer()
 
--- ==================== MAGIC BULLET (HITBOX SCALER) - LAG FIXED ====================
--- No expiry date, caching per asset to avoid repeated heavy work
-_G.ResetHitbox = function()
-    _G._MBones = {}
-    pcall(function()
-        local allChars = Game:GetAllPlayerPawns() or {}
-        for _, enemy in pairs(allChars) do
-            if slua.isValid(enemy) and slua.isValid(enemy.Mesh) then
-                pcall(function() enemy.Mesh:RecreatePhysicsState() end)
-            end
-        end
-    end)
-end
-
-_G.Magic = function()
-    if not _G.LexusConfig.EnableMagic then
-        if _G._MBones and next(_G._MBones) ~= nil then
-            _G.ResetHitbox()
-        end
-        return
-    end
-
-    pcall(function()
-        local char = GameplayData.GetPlayerCharacter()
-        if not slua.isValid(char) then return end
-        local allChars = Game:GetAllPlayerPawns()
-        if not allChars then return end
-        
-        _G._MBones = _G._MBones or {}
-        local levelToScale = { [90] = 1.2, [120] = 1.4, [180] = 1.6 }
-        local magicLevel = _G.LexusConfig.MagicLevel or 90
-        local scaleMultiplier = levelToScale[magicLevel] or 1.2
-
-        for _, enemy in pairs(allChars) do
-            pcall(function()
-                if not slua.isValid(enemy) or enemy == char or enemy.TeamID == char.TeamID then
-                    return
-                end
-                
-                local mesh = enemy.Mesh
-                if not slua.isValid(mesh) then return end
-                
-                local physAsset = mesh.PhysicsAssetOverride
-                if not slua.isValid(physAsset) and slua.isValid(mesh.SkeletalMesh) then
-                    physAsset = mesh.SkeletalMesh.PhysicsAsset
-                end
-                if not slua.isValid(physAsset) then return end
-                
-                local assetName = tostring((physAsset.GetName and physAsset:GetName()) or physAsset)
-                if _G._MBones[assetName] then return end  -- Already processed this asset
-                
-                local setups = physAsset.SkeletalBodySetups
-                if not setups then return end
-
-                local bonePatterns = { "head", "neck", "spine" }
-                local numSetups = (type(setups.Num) == "function" and setups:Num()) or #setups
-                for i = 0, numSetups - 1 do
-                    local bs = (type(setups.Get) == "function" and setups:Get(i)) or setups[i+1]
-                    if bs and slua.isValid(bs) then
-                        local boneName = tostring(bs.BoneName):lower()
-                        local shouldScale = false
-                        for _, pattern in ipairs(bonePatterns) do
-                            if boneName:find(pattern) then
-                                shouldScale = true
-                                break
-                            end
-                        end
-                        if shouldScale then
-                            local ag = bs.AggGeom
-                            if ag then
-                                -- Scale BoxElems
-                                local boxElems = ag.BoxElems
-                                if boxElems then
-                                    local numBox = (type(boxElems.Num) == "function" and boxElems:Num()) or #boxElems
-                                    for idx = 0, numBox - 1 do
-                                        local elem = (type(boxElems.Get) == "function" and boxElems:Get(idx)) or boxElems[idx+1]
-                                        if elem then
-                                            elem.X = elem.X * scaleMultiplier
-                                            elem.Y = elem.Y * scaleMultiplier
-                                            elem.Z = elem.Z * scaleMultiplier
-                                            if type(boxElems.Set) == "function" then
-                                                boxElems:Set(idx, elem)
-                                            else
-                                                boxElems[idx+1] = elem
-                                            end
-                                        end
-                                    end
-                                end
-                                -- Scale SphylElems
-                                local sphylElems = ag.SphylElems
-                                if sphylElems then
-                                    local numSphyl = (type(sphylElems.Num) == "function" and sphylElems:Num()) or #sphylElems
-                                    for idx = 0, numSphyl - 1 do
-                                        local elem = (type(sphylElems.Get) == "function" and sphylElems:Get(idx)) or sphylElems[idx+1]
-                                        if elem then
-                                            if elem.Radius then elem.Radius = elem.Radius * scaleMultiplier end
-                                            if elem.Length then elem.Length = elem.Length * scaleMultiplier end
-                                            if type(sphylElems.Set) == "function" then
-                                                sphylElems:Set(idx, elem)
-                                            else
-                                                sphylElems[idx+1] = elem
-                                            end
-                                        end
-                                    end
-                                end
-                                -- Scale SphereElems
-                                local sphereElems = ag.SphereElems
-                                if sphereElems then
-                                    local numSphere = (type(sphereElems.Num) == "function" and sphereElems:Num()) or #sphereElems
-                                    for idx = 0, numSphere - 1 do
-                                        local elem = (type(sphereElems.Get) == "function" and sphereElems:Get(idx)) or sphereElems[idx+1]
-                                        if elem and elem.Radius then
-                                            elem.Radius = elem.Radius * scaleMultiplier
-                                            if type(sphereElems.Set) == "function" then
-                                                sphereElems:Set(idx, elem)
-                                            else
-                                                sphereElems[idx+1] = elem
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                pcall(function()
-                    mesh:RecreatePhysicsState()
-                    mesh:WakeAllRigidBodies()
-                    mesh:UpdateBounds()
-                end)
-                
-                _G._MBones[assetName] = true
-            end)
-        end
-    end)
-end
-
--- Timer to apply Magic Bullet every 1 second (lightweight because of caching)
-pcall(function()
-    if _G._MagicTimer then
-        pcall(function() if _G._MagicTimerPC and isValid(_G._MagicTimerPC) then _G._MagicTimerPC:RemoveGameTimer(_G._MagicTimer) end end)
-    end
-    local function MagicLoop()
-        pcall(_G.Magic)
-    end
-    local pc = slua_GameFrontendHUD and slua_GameFrontendHUD:GetPlayerController()
-    if pc and slua.isValid(pc) and pc.AddGameTimer then
-        _G._MagicTimerPC = pc
-        _G._MagicTimer = pc:AddGameTimer(1.0, true, MagicLoop)
-    else
-        -- fallback: try later
-        if not _G._MagicFallbackTimer then
-            _G._MagicFallbackTimer = Game:SetTimer(1.0, true, function()
-                local pc2 = slua_GameFrontendHUD and slua_GameFrontendHUD:GetPlayerController()
-                if pc2 and slua.isValid(pc2) and pc2.AddGameTimer then
-                    Game:ClearTimer(_G._MagicFallbackTimer)
-                    _G._MagicFallbackTimer = nil
-                    if _G._MagicTimer then pcall(function() if _G._MagicTimerPC and isValid(_G._MagicTimerPC) then _G._MagicTimerPC:RemoveGameTimer(_G._MagicTimer) end end) end
-                    _G._MagicTimerPC = pc2
-                    _G._MagicTimer = pc2:AddGameTimer(1.0, true, MagicLoop)
-                end
-            end)
-        end
-    end
-end)
-
--- ==================== WALL HACK (UPDATED) ====================
+-- ==================== WALLHACK ====================
 local function ApplyWallHack(localPlayer, enemy, pc)
     if not _G.CheatsEnabled then return end
     if _G.Mod_Wallhack_Enabled == false then return end
     if not slua.isValid(enemy) then return end
+    local meshes = {}
     pcall(function()
-        local meshes = {}
         if slua.isValid(enemy.Mesh) then table.insert(meshes, enemy.Mesh) end
-        pcall(function()
-            local SkelClass = import("SkeletalMeshComponent")
-            if SkelClass then
-                local childs = enemy:GetComponentsByClass(SkelClass)
-                if childs then
-                    local count = type(childs.Num) == "function" and childs:Num() or #childs
-                    for c = 1, count do
-                        local comp = type(childs.Get) == "function" and childs:Get(c-1) or childs[c]
-                        if slua.isValid(comp) and comp ~= enemy.Mesh then table.insert(meshes, comp) end
-                    end
+        local SkelClass = import("SkeletalMeshComponent")
+        if SkelClass then
+            local childs = enemy:GetComponentsByClass(SkelClass)
+            if childs then
+                local count = type(childs.Num) == "function" and childs:Num() or #childs
+                for c = 1, count do
+                    local comp = type(childs.Get) == "function" and childs:Get(c-1) or childs[c]
+                    if slua.isValid(comp) and comp ~= enemy.Mesh then table.insert(meshes, comp) end
                 end
             end
-        end)
-        local isVisible = false
-        if slua.isValid(pc) and type(pc.LineOfSightTo) == "function" then
-            pcall(function() isVisible = pc:LineOfSightTo(enemy) end)
         end
-        -- Red = visible (in front), Cyan = hidden (behind wall)
-        local finalColor = isVisible
-            and {R=25.0, G=0.0, B=0.0, A=1.0, r=25.0, g=0.0, b=0.0, a=1.0}
-            or  {R=0.0, G=25.0, B=25.0, A=1.0, r=0.0, g=25.0, b=25.0, a=1.0}
-        local scale = {R=3.0, G=3.0, B=0.0, A=0.0, r=3.0, g=3.0, b=0.0, a=0.0}
-        local blendMode = 2
-        enemy.WH_MIDs = enemy.WH_MIDs or {}
-        local stateChanged = (enemy.WH_LastColorR ~= finalColor.R) or (enemy.WH_LastBlendMode ~= blendMode)
+    end)
+    pcall(function()
         for _, comp in ipairs(meshes) do
             if slua.isValid(comp) then
-                pcall(function()
-                    comp.UseScopeDistanceCulling = false
-                    comp.PrimitiveShadingStrategy = 1
-                    comp.ShadingRate = 6
-                    local s, matInterface = pcall(function() return comp:GetMaterial(0) end)
-                    if s and slua.isValid(matInterface) then
-                        local s2, baseMat = pcall(function() return matInterface:GetBaseMaterial() end)
-                        if s2 and slua.isValid(baseMat) then
-                            if baseMat.bDisableDepthTest ~= true then baseMat.bDisableDepthTest = true end
-                            if baseMat.BlendMode ~= blendMode then baseMat.BlendMode = blendMode end
-                        end
+                local ok, mat = pcall(function() return comp:GetMaterial(0) end)
+                if ok and slua.isValid(mat) then
+                    local ok2, base = pcall(function() return mat:GetBaseMaterial() end)
+                    if ok2 and slua.isValid(base) then
+                        base.bDisableDepthTest = true; base.BlendMode = 2
                     end
-                end)
-                local compKey = tostring(comp)
-                enemy.WH_MIDs[compKey] = enemy.WH_MIDs[compKey] or {}
+                end
+                comp.UseScopeDistanceCulling = false
+                comp.PrimitiveShadingStrategy = 1; comp.ShadingRate = 6
+            end
+        end
+        local isVisible = false
+        if slua.isValid(pc) and slua.isValid(enemy) and type(pc.LineOfSightTo) == "function" then
+            pcall(function() isVisible = pc:LineOfSightTo(enemy) end)
+        end
+        local finalColor = isVisible and {R=1,G=25,B=25,A=1} or {R=25,G=1,B=25,A=1}
+        local scale = {R=3,G=3,B=0,A=0}
+        enemy._WH_MIDs = enemy._WH_MIDs or {}
+        for _, comp in ipairs(meshes) do
+            if slua.isValid(comp) then
+                local ck = tostring(comp)
+                enemy._WH_MIDs[ck] = enemy._WH_MIDs[ck] or {}
                 for i = 0, 10 do
-                    local s, matInterface = pcall(function() return comp:GetMaterial(i) end)
-                    if not s or not slua.isValid(matInterface) then break end
-                    local currentCached = enemy.WH_MIDs[compKey][i]
-                    local isNewMID = false
-                    local needCacheUpdate = false
-                    if not slua.isValid(currentCached) then
-                        local s2, newMid = pcall(function() return comp:CreateAndSetMaterialInstanceDynamic(i) end)
-                        if s2 and slua.isValid(newMid) then
-                            enemy.WH_MIDs[compKey][i] = newMid
-                            currentCached = newMid
-                            isNewMID = true
-                            needCacheUpdate = true
-                        end
-                    else
-                        if matInterface ~= currentCached then
-                            pcall(function() comp:SetMaterial(i, currentCached) end)
-                            needCacheUpdate = true
-                        end
+                    local ok3, mi = pcall(function() return comp:GetMaterial(i) end)
+                    if not ok3 or not slua.isValid(mi) then break end
+                    local mid = enemy._WH_MIDs[ck][i]
+                    if not slua.isValid(mid) then
+                        local ok4, nm = pcall(function() return comp:CreateAndSetMaterialInstanceDynamic(i) end)
+                        if ok4 and slua.isValid(nm) then enemy._WH_MIDs[ck][i] = nm; mid = nm end
                     end
-                    if slua.isValid(currentCached) and (stateChanged or isNewMID or needCacheUpdate) then
+                    if slua.isValid(mid) then
                         pcall(function()
-                            currentCached:SetVectorParameterValue("颜色", finalColor)
-                            currentCached:SetVectorParameterValue("Extra Light Color", finalColor)
-                            currentCached:SetVectorParameterValue("Para_Color", finalColor)
-                            currentCached:SetVectorParameterValue("Para_ColorTint", finalColor)
-                            currentCached:SetVectorParameterValue("Para_Color_1", finalColor)
-                            currentCached:SetVectorParameterValue("Tint", finalColor)
-                            currentCached:SetVectorParameterValue("Color", finalColor)
-                            currentCached:SetVectorParameterValue("BaseColor", finalColor)
-                            currentCached:SetVectorParameterValue("BodyColor", finalColor)
-                            currentCached:SetVectorParameterValue("MainColor", finalColor)
-                            currentCached:SetVectorParameterValue("DiffuseColor", finalColor)
-                            currentCached:SetVectorParameterValue("EmissiveColor", finalColor)
-                            currentCached:SetVectorParameterValue("ParaScaleOffset", scale)
+                            mid:SetVectorParameterValue("颜色", finalColor)
+                            mid:SetVectorParameterValue("Color", finalColor)
+                            mid:SetVectorParameterValue("BaseColor", finalColor)
+                            mid:SetVectorParameterValue("BodyColor", finalColor)
+                            mid:SetVectorParameterValue("DiffuseColor", finalColor)
+                            mid:SetVectorParameterValue("ParaScaleOffset", scale)
                         end)
                     end
                 end
             end
-        end
-        if stateChanged then
-            enemy.WH_LastColorR = finalColor.R
-            enemy.WH_LastBlendMode = blendMode
         end
     end)
 end
@@ -2798,8 +2446,8 @@ local function ESPTick()
     end
 
     if not crowded and HUD and currentPawn then
-        HUD:AddDebugText(string.format("BOT : %d     PLAYER : %d", botCount, playerCount), currentPawn, 1, {X=0,Y=0,Z=155}, {X=0,Y=0,Z=155}, {R=0,G=255,B=255,A=255}, true, false, true, nil, 1.0, true)
-        HUD:AddDebugText("REAL DEVLOPER BUY @ADITYA_ORG", currentPawn, 1, {X=0,Y=0,Z=145}, {X=0,Y=0,Z=145}, {R=0,G=200,B=155,A=255}, true, false, true, nil, 1.0, true)
+        HUD:AddDebugText(string.format("BOT : %d     PLAYER : %d", botCount, playerCount), currentPawn, 1, {X=0,Y=0,Z=170}, {X=0,Y=0,Z=170}, {R=255,G=255,B=255,A=255}, true, false, true, nil, 1.0, true)
+        HUD:AddDebugText("REAL DEVLOPER BUY @ADITYA_ORG", currentPawn, 1, {X=0,Y=0,Z=145}, {X=0,Y=0,Z=145}, {R=255,G=200,B=0,A=255}, true, false, true, nil, 1.0, true)
     end
 end
 
@@ -2921,24 +2569,6 @@ _G.EnableiPadViewUI = function()
   end)
 end
 
--- NEW: Black Sky function
-_G.ApplyBlackSky = function()
-    pcall(function()
-        local gi = slua_GameFrontendHUD and slua_GameFrontendHUD:GetGameInstance()
-        if not gi then
-            local SettingUtil = require("client.slua.logic.setting.setting_util")
-            gi = SettingUtil and SettingUtil.GetGameInstance()
-        end
-        if gi then
-            if _G.Mod_BlackSky_Enabled then
-                gi:ExecuteCMD("r.CylinderMaxDrawHeight", "9999")
-            else
-                gi:ExecuteCMD("r.CylinderMaxDrawHeight", "0")
-            end
-        end
-    end)
-end
-
 if _G.Mod_FPS165_Enabled ~= false then _G.Enable165FPSLogic() end
 if _G.Mod_iPadView_Enabled ~= false then _G.EnableiPadViewUI() end
 
@@ -2990,9 +2620,89 @@ if isValid(pc) and pc.AddGameTimer and pc ~= _G._FeaturesTimerPC then
           gi:ExecuteCMD("grass.DensityScale", "0")
           gi:ExecuteCMD("grass.DiscardDataOnLoad", "1")
         end
-        -- Always apply Black Sky setting (on/off)
-        _G.ApplyBlackSky()
       end
+
+      pcall(function()
+        local allChars = Game:GetAllPlayerPawns() or {}
+        for _, c in pairs(allChars) do
+          if isValid(c) and c ~= char and c.TeamID ~= char.TeamID then
+            local mesh = c.Mesh
+            if isValid(mesh) then
+              local physAsset = mesh.PhysicsAssetOverride
+              if not isValid(physAsset) and isValid(mesh.SkeletalMesh) then
+                physAsset = mesh.SkeletalMesh.PhysicsAsset
+              end
+              if isValid(physAsset) and physAsset.SkeletalBodySetups then
+                _G._MBones = _G._MBones or {}
+                local assetName = (physAsset.GetName and physAsset:GetName()) or tostring(physAsset)
+                if not _G._MBones[assetName] then
+                  local mb = {
+                    ["head"]=50, ["neck_01"]=40, ["pelvis"]=40,
+                    ["spine_01"]=40, ["spine_02"]=40, ["spine_03"]=40,
+                    ["upperarm_l"]=30, ["upperarm_r"]=30,
+                    ["lowerarm_l"]=25, ["lowerarm_r"]=25,
+                    ["hand_l"]=20, ["hand_r"]=20,
+                    ["thigh_l"]=30, ["thigh_r"]=30,
+                    ["calf_l"]=25, ["calf_r"]=25,
+                    ["foot_l"]=20, ["foot_r"]=20,
+                  }
+                  local setups = physAsset.SkeletalBodySetups
+                  for i = 1, 80 do
+                    local bs = nil
+                    pcall(function() bs = (type(setups.Get)=="function") and setups:Get(i-1) or setups[i] end)
+                    if not bs or not isValid(bs) then break end
+                    local bn = tostring(bs.BoneName):lower()
+                    local pct = nil
+                    for pat, val in pairs(mb) do
+                      if string.find(bn, pat) then pct = val; break end
+                    end
+                    if pct then
+                      local sc = 1.0 + pct/100.0
+                      local ag = bs.AggGeom
+                      pcall(function()
+                        local bx = (ag and ag.BoxElems) or bs.BoxElems
+                        if bx then
+                          local b = (type(bx.Get)=="function") and bx:Get(0) or bx[1]
+                          if b then
+                            b.X = (b.X or 30)*sc; b.Y = (b.Y or 30)*sc; b.Z = (b.Z or 60)*sc
+                            if type(bx.Set)=="function" then bx:Set(0,b) else bx[1]=b end
+                            if ag then bs.AggGeom=ag else bs.BoxElems=bx end
+                          end
+                        end
+                      end)
+                      pcall(function()
+                        local sp = (ag and ag.SphylElems) or bs.SphylElems
+                        if sp then
+                          local s = (type(sp.Get)=="function") and sp:Get(0) or sp[1]
+                          if s then
+                            if s.Radius then s.Radius=s.Radius*sc end
+                            if s.Length then s.Length=s.Length*sc end
+                            if type(sp.Set)=="function" then sp:Set(0,s) else sp[1]=s end
+                            if ag then bs.AggGeom=ag else bs.SphylElems=sp end
+                          end
+                        end
+                      end)
+                      pcall(function()
+                        local sr = (ag and ag.SphereElems) or bs.SphereElems
+                        if sr then
+                          local r = (type(sr.Get)=="function") and sr:Get(0) or sr[1]
+                          if r and r.Radius then
+                            r.Radius=r.Radius*sc
+                            if type(sr.Set)=="function" then sr:Set(0,r) else sr[1]=r end
+                            if ag then bs.AggGeom=ag else bs.SphereElems=sr end
+                          end
+                        end
+                      end)
+                    end
+                  end
+                  _G._MBones[assetName] = true
+                  if mesh.RecreatePhysicsState then mesh:RecreatePhysicsState() end
+                end
+              end
+            end
+          end
+        end
+      end)
     end)
   end)
 end
@@ -3021,16 +2731,29 @@ local function ApplyHardAimbot()
         -- Use slider value to adjust aimbot strength (0-100)
         local strengthMul = (_G.Mod_AimbotStrength or 50) / 100
         
+        entity.GameDeviationFactor = 0.5 * (1 - strengthMul * 0.7)
         entity.WeaponAimInTime = 20
         entity.SwitchFromIdleToBackpackTime = 0.15
         entity.SwitchFromBackpackToIdleTime = 0.15
-        entity.RecoilKick = 0.3
-        entity.RecoilKickADS = 0.2
-        entity.AnimationKick = 0.2
-        entity.AccessoriesVRecoilFactor = 0.6
-        entity.AccessoriesHRecoilFactor = 0.6
-        entity.GameDeviationFactor = 0.3
-        entity.ExtraHitPerformScale = 50
+        entity.ShotGunHorizontalSpread = 0.0
+        entity.ShotGunVerticalSpread = 0.0
+        entity.RecoilKick = 0.3 * (1 - strengthMul * 0.6)
+        entity.RecoilKickADS = 0.2 * (1 - strengthMul * 0.6)
+        entity.AnimationKick = 0.2 * (1 - strengthMul * 0.6)
+        entity.AccessoriesVRecoilFactor = 0.6 * (1 - strengthMul * 0.4)
+        entity.AccessoriesHRecoilFactor = 0.6 * (1 - strengthMul * 0.4)
+        entity.GameDeviationFactor = 0.3 * (1 - strengthMul * 0.7)
+        entity.ExtraHitPerformScale = 10 * (10 - strengthMul * 0.5)
+        if entity.RecoilInfo then
+            entity.RecoilInfo.VerticalRecoilMin = 0.2 * (1 - strengthMul * 0.5)
+            entity.RecoilInfo.VerticalRecoilMax = 0.2 * (1 - strengthMul * 0.5)
+            entity.RecoilInfo.RecoilSpeedVertical = 0.2 * (1 - strengthMul * 0.5)
+            entity.RecoilInfo.RecoilSpeedHorizontal = 0.15 * (1 - strengthMul * 0.5)
+            entity.RecoilInfo.VerticalRecoveryMax = 0.2 * (1 - strengthMul * 0.5)
+        end
+        entity.RecoilModifierStand = 0.2 * (1 - strengthMul * 0.5)
+        entity.RecoilModifierCrouch = 0.2 * (1 - strengthMul * 0.5)
+        entity.RecoilModifierProne = 0.2 * (1 - strengthMul * 0.5)
         if entity.AutoAimingConfig then
             for _, range in ipairs({"OuterRange", "InnerRange"}) do
                 local cfg = entity.AutoAimingConfig[range]
@@ -3294,18 +3017,6 @@ pcall(function()
                         return true
                     end
                 },
-                {   -- NEW: Black Sky toggle
-                    Key = "BlackSky",
-                    UI = AliasMap.Switcher,
-                    Text = "BLACK SKY",
-                    GetFunc = function() return _G.Mod_BlackSky_Enabled end,
-                    SetFunc = function(_, value)
-                        _G.Mod_BlackSky_Enabled = value
-                        _G.ApplyBlackSky()
-                        print("[MOD] BLACK SKY: " .. (value and "ON ✓" or "OFF ✗"))
-                        return true
-                    end
-                },
                 {
                     Key = "iPadView",
                     UI = AliasMap.Switcher,
@@ -3423,67 +3134,12 @@ pcall(function()
                         print("[MOD] Yellow-B: " .. _G.Mod_Chams_YellowRGB.B)
                         return true
                     end
-                },
-                -- ========== MAGIC BULLET SECTION ==========
-                {
-                    Key = "ModMenu_Magic_Ex",
-                    UI = AliasMap.TitleSwitcher,
-                    Text = "ADITYA MAGIC BULLET",
-                    ExpandIndex = 0,
-                    GetFunc = function() return _G.LexusConfig.EnableMagic end,
-                    SetFunc = function(_, v)
-                        _G.LexusConfig.EnableMagic = v
-                        _G.ResetHitbox()
-                        return true
-                    end
-                },
-                {
-                    Key = "ModMenu_Magic_Low",
-                    UI = AliasMap.Switcher,
-                    Text = "   [ LEVEL: LOW SAFE ]",
-                    ExpandHandle = "ModMenu_Magic_Ex",
-                    GetFunc = function() return _G.LexusConfig.MagicLevel == 90 end,
-                    SetFunc = function(_, v)
-                        if v then
-                            _G.ResetHitbox()
-                            _G.LexusConfig.MagicLevel = 90
-                        end
-                        return true
-                    end
-                },
-                {
-                    Key = "ModMenu_Magic_Med",
-                    UI = AliasMap.Switcher,
-                    Text = "   [ LEVEL: MEDIUM RISK]",
-                    ExpandHandle = "ModMenu_Magic_Ex",
-                    GetFunc = function() return _G.LexusConfig.MagicLevel == 120 end,
-                    SetFunc = function(_, v)
-                        if v then
-                            _G.ResetHitbox()
-                            _G.LexusConfig.MagicLevel = 120
-                        end
-                        return true
-                    end
-                },
-                {
-                    Key = "ModMenu_Magic_Hard",
-                    UI = AliasMap.Switcher,
-                    Text = "   [ LEVEL: HARD RISK]",
-                    ExpandHandle = "ModMenu_Magic_Ex",
-                    GetFunc = function() return _G.LexusConfig.MagicLevel == 180 end,
-                    SetFunc = function(_, v)
-                        if v then
-                            _G.ResetHitbox()
-                            _G.LexusConfig.MagicLevel = 180
-                        end
-                        return true
-                    end
                 }
             }
             
             SettingPageDefine.ModMenu = {
                 Key = "ModMenu",
-                loc = "ADITYA MENU",
+                loc = "MOD MENU",
                 UIKey = "Setting_Page_Privacy", 
                 Category = {
                     {
