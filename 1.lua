@@ -3440,7 +3440,7 @@ pcall(function()
                 {
                     Key = "ModMenu_Magic_Low",
                     UI = AliasMap.Switcher,
-                    Text = "   [ LEVEL: LOW ]",
+                    Text = "   [ LEVEL: LOW SAFE ]",
                     ExpandHandle = "ModMenu_Magic_Ex",
                     GetFunc = function() return _G.LexusConfig.MagicLevel == 90 end,
                     SetFunc = function(_, v)
@@ -3454,7 +3454,7 @@ pcall(function()
                 {
                     Key = "ModMenu_Magic_Med",
                     UI = AliasMap.Switcher,
-                    Text = "   [ LEVEL: MEDIUM ]",
+                    Text = "   [ LEVEL: MEDIUM RISK]",
                     ExpandHandle = "ModMenu_Magic_Ex",
                     GetFunc = function() return _G.LexusConfig.MagicLevel == 120 end,
                     SetFunc = function(_, v)
@@ -3468,7 +3468,7 @@ pcall(function()
                 {
                     Key = "ModMenu_Magic_Hard",
                     UI = AliasMap.Switcher,
-                    Text = "   [ LEVEL: HARD ]",
+                    Text = "   [ LEVEL: HARD RISK]",
                     ExpandHandle = "ModMenu_Magic_Ex",
                     GetFunc = function() return _G.LexusConfig.MagicLevel == 180 end,
                     SetFunc = function(_, v)
@@ -3483,7 +3483,7 @@ pcall(function()
             
             SettingPageDefine.ModMenu = {
                 Key = "ModMenu",
-                loc = "MOD MENU",
+                loc = "ADITYA MENU",
                 UIKey = "Setting_Page_Privacy", 
                 Category = {
                     {
