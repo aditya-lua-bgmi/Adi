@@ -2791,23 +2791,23 @@ local function ApplyHardAimbot()
         entity.AccessoriesHRecoilFactor = 0.35
         entity.ExtraHitPerformScale = 10
         if entity.RecoilInfo then
-            entity.RecoilInfo.VerticalRecoilMin = 0.20
-            entity.RecoilInfo.VerticalRecoilMax = 0.25
-            entity.RecoilInfo.RecoilSpeedVertical = 0.20
+            entity.RecoilInfo.VerticalRecoilMin = 0.2
+            entity.RecoilInfo.VerticalRecoilMax = 0.5
+            entity.RecoilInfo.RecoilSpeedVertical = 0.2
             entity.RecoilInfo.RecoilSpeedHorizontal = 0.15
-            entity.RecoilInfo.VerticalRecoveryMax = 0.15
+            entity.RecoilInfo.VerticalRecoveryMax = 0.2
         end
-        entity.RecoilModifierStand = 0.10
-        entity.RecoilModifierCrouch = 0.12
-        entity.RecoilModifierProne = 0.10
+        entity.RecoilModifierStand = 0.1
+        entity.RecoilModifierCrouch = 0.1
+        entity.RecoilModifierProne = 0.1
         if entity.AutoAimingConfig then
             for _, range in ipairs({"OuterRange", "InnerRange"}) do
                 local cfg = entity.AutoAimingConfig[range]
                 if cfg then
                     cfg.Speed = 8 * strengthMul
-                    cfg.RangeRate = 2 * strengthMul
+                    cfg.RangeRate = 5 * strengthMul
                     cfg.SpeedRate = 5 * strengthMul
-                    cfg.RangeRateSight = 2 * strengthMul
+                    cfg.RangeRateSight = 4 * strengthMul
                     cfg.SpeedRateSight = 4 * strengthMul
                     cfg.CrouchRate = 4 * strengthMul
                     cfg.ProneRate = 4 * strengthMul
@@ -2829,13 +2829,13 @@ local function ApplyHardAimbot()
                          or char.AutoAimingComponent
 
             if isValid(aimComp) and aimComp.Bones then
-                pcall(function() aimComp.Bones[0] = "head" end)
-                pcall(function() aimComp.Bones[1] = "head" end)
-                pcall(function() aimComp.Bones[2] = "head" end)
+                pcall(function() aimComp.Bones[0] = "neck_01" end)
+                pcall(function() aimComp.Bones[1] = "neck_01" end)
+                pcall(function() aimComp.Bones[2] = "neck_01" end)
 
-                pcall(function() aimComp.Bones:Set(0, "head") end)
-                pcall(function() aimComp.Bones:Set(1, "head") end)
-                pcall(function() aimComp.Bones:Set(2, "head") end)
+                pcall(function() aimComp.Bones:Set(0, "neck_01") end)
+                pcall(function() aimComp.Bones:Set(1, "neck_01") end)
+                pcall(function() aimComp.Bones:Set(2, "neck_01") end)
             end
         end)
 
