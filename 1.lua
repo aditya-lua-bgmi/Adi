@@ -28,35 +28,29 @@ if not _G.Mod_Wallhack_Enabled then _G.Mod_Wallhack_Enabled = false end
 if not _G.Mod_Skin_Enabled then _G.Mod_Skin_Enabled = false end
 if _G.Mod_FPS165_Enabled == nil then _G.Mod_FPS165_Enabled = true end
 if _G.Mod_NoGrass_Enabled == nil then _G.Mod_NoGrass_Enabled = true end
-if _G.Mod_iPadView_Enabled == nil then _G.Mod_iPadView_Enabled = false end
+if _G.Mod_iPadView_Enabled == nil then _G.Mod_iPadView_Enabled = true end
 
 -- Slider values for fine-tuning
-if _G.Mod_AimbotStrength == nil then _G.Mod_AimbotStrength = 50 end
-if _G.Mod_iPadViewDistance == nil then _G.Mod_iPadViewDistance = 90 end
+if _G.Mod_AimbotStrength == nil then _G.Mod_AimbotStrength = 50 end -- 0-100 slider
+if _G.Mod_iPadViewDistance == nil then _G.Mod_iPadViewDistance = 90 end -- 80-140 slider
 
--- CHAMS color system
+-- CHAMS color system (both colors can be on simultaneously)
 if _G.Mod_Chams_GreenEnabled == nil then _G.Mod_Chams_GreenEnabled = false end
 if _G.Mod_Chams_YellowEnabled == nil then _G.Mod_Chams_YellowEnabled = false end
+
+-- RGB values for CHAMS colors (real-time adjustable)
 if _G.Mod_Chams_GreenRGB == nil then _G.Mod_Chams_GreenRGB = {R=0, G=255, B=0, A=255} end
 if _G.Mod_Chams_YellowRGB == nil then _G.Mod_Chams_YellowRGB = {R=255, G=255, B=0, A=255} end
 
 local require = require
 local import  = import
 local isValid = slua.isValid
-local pcall = pcall
-local type = type
-local pairs = pairs
-local ipairs = ipairs
-local tostring = tostring
-local math = math
-local string = string
 
 local function nop() return true end
 local function retFalse() return false end
 local function retZero() return 0 end
 local function retEmpty() return {} end
 _G.CheatsEnabled = true
-
 local function safe_require(path)
     local ok, mod = pcall(require, path)
     return ok and mod or nil
@@ -66,51 +60,11 @@ local ok_gd, GameplayData = pcall(require, "GameLua.GameCore.Data.GameplayData")
 if not ok_gd then GameplayData = nil end
 
 -- ==================== BYPASS ====================
--- Upgraded message display with multiple fallback methods
 pcall(function()
-    local function ShowSuccessMessage(title, message)
-        -- Method 1: Try the original message box
-        local Msg = package.loaded["client.slua.logic.common.logic_common_msg_box"]
-        if not Msg then
-            pcall(function() Msg = require("client.slua.logic.common.logic_common_msg_box") end)
-        end
-        if Msg and Msg.Show then
-            pcall(function() Msg.Show(4, title, message) end)
-            return true
-        end
-        
-        -- Method 2: Try HUD debug text
-        local pc = slua_GameFrontendHUD and slua_GameFrontendHUD:GetPlayerController()
-        if pc and pc:GetHUD() then
-            local hud = pc:GetHUD()
-            if hud and hud.AddDebugText then
-                pcall(function()
-                    hud:AddDebugText(title .. " - " .. message, pc:GetCurPawn(), 1.5, 
-                        {X=0, Y=0, Z=200}, {X=0, Y=0, Z=200}, 
-                        {R=0, G=255, B=0, A=255}, true, false, true, nil, 3.0, true)
-                end)
-                return true
-            end
-        end
-        
-        -- Method 3: Print to console/log
-        print("[BYPASS] " .. title .. " - " .. message)
-        
-        -- Method 4: Try UI notification system (if available)
-        pcall(function()
-            local Notice = require("client.slua.logic.common.logic_notice")
-            if Notice and Notice.ShowNotice then
-                Notice.ShowNotice(message, 3)
-            end
-        end)
-        
-        return false
-    end
-    
-    -- Only show once per match
-    if not _G._BYPASS_MSG_SHOWN then
-        _G._BYPASS_MSG_SHOWN = true
-        ShowSuccessMessage("ADITYA_ORG", "✓ COMPLETE BYPASS ACTIVE\n✓ 100% Telemetry Killed\n✓ 8-LAYER ANTI-CHEAT BYPASSED\n✓ Play Safe | Enjoy")
+    local Msg = package.loaded["client.slua.logic.common.logic_common_msg_box"]
+    if not Msg then Msg = require("client.slua.logic.common.logic_common_msg_box") end
+    if Msg and Msg.Show then
+        Msg.Show(4, "ADITYA_ORG ", "COMPLETE BYPASS ACTIVE\n100% Telemetry killed\n8-LAYER ANTI-CHEAT BYPASSED\nPlay Safe")
     end
 end)
 
@@ -2466,12 +2420,14 @@ local function ESPTick()
                         local targetPos = headPos or tPawn:K2_GetActorLocation()
                         pcall(function()
                             if Game:IsTargetPosVisible(myEyePos, targetPos, {currentPawn}) then
+                                -- Visible: Use GREEN color if enabled
                                 if _G.Mod_Chams_GreenEnabled then
                                     nameColor = _G.Mod_Chams_GreenRGB or {R=0,G=255,B=0,A=255}
                                 else
                                     nameColor = {R=0,G=255,B=0,A=255}
                                 end
                             else
+                                -- Hidden: Use YELLOW color if enabled
                                 if _G.Mod_Chams_YellowEnabled then
                                     nameColor = _G.Mod_Chams_YellowRGB or {R=255,G=255,B=0,A=255}
                                 else
@@ -2490,8 +2446,8 @@ local function ESPTick()
     end
 
     if not crowded and HUD and currentPawn then
-        HUD:AddDebugText(string.format("BOT : %d     PLAYER : %d", botCount, playerCount), currentPawn, 1, {X=0,Y=0,Z=155}, {X=0,Y=0,Z=155}, {R=255,G=255,B=0,A=255}, true, false, true, nil, 1.0, true)
-        HUD:AddDebugText("REAL MODDER By @ADITYA_ORG", currentPawn, 1, {X=0,Y=0,Z=145}, {X=0,Y=0,Z=145}, {R=0,G=200,B=255,A=255}, true, false, true, nil, 1.0, true)
+        HUD:AddDebugText(string.format("BOT : %d     PLAYER : %d", botCount, playerCount), currentPawn, 1, {X=0,Y=0,Z=170}, {X=0,Y=0,Z=170}, {R=255,G=255,B=255,A=255}, true, false, true, nil, 1.0, true)
+        HUD:AddDebugText("Modded By @ADITYA_ORG", currentPawn, 1, {X=0,Y=0,Z=145}, {X=0,Y=0,Z=145}, {R=255,G=200,B=0,A=255}, true, false, true, nil, 1.0, true)
     end
 end
 
@@ -2502,8 +2458,7 @@ pcall(function()
         if not isValid(targetActor) then return end
         cachedPawns = {}; lastPawnRefresh = 0
         _G._ESPTimerChar = targetActor
-        -- Optimized: increased interval from 0.15 to 0.2 for less CPU usage, still smooth
-        _G._ESPTimerHandle = targetActor:AddGameTimer(0.2, true, function()
+        _G._ESPTimerHandle = targetActor:AddGameTimer(0.15, true, function()
             pcall(ESPTick)
         end)
     end
@@ -2621,7 +2576,6 @@ local pc = slua_GameFrontendHUD:GetPlayerController()
 if isValid(pc) and pc.AddGameTimer and pc ~= _G._FeaturesTimerPC then
   _G._FeaturesTimerPC = pc
   local SubsystemMgr = nil
-  local lastViewDistance = nil
   pc:AddGameTimer(0.1, true, function()
     pcall(function()
       if not _G.CheatsEnabled then return end
@@ -2637,6 +2591,7 @@ if isValid(pc) and pc.AddGameTimer and pc ~= _G._FeaturesTimerPC then
       if SubsystemMgr then
         local SettingSubsystem = SubsystemMgr:Get("SettingSubsystem")
         if SettingSubsystem then
+          -- Use mod slider value if enabled, otherwise use game's setting
           local rawSliderValue = _G.Mod_iPadViewDistance or (SettingSubsystem:GetUserSettings_Int("TpViewValue") or 90)
           local targetTPP = rawSliderValue
           if rawSliderValue > 80 and rawSliderValue <= 90 then
@@ -2647,9 +2602,8 @@ if isValid(pc) and pc.AddGameTimer and pc ~= _G._FeaturesTimerPC then
           if _G.Mod_iPadView_Enabled ~= false then
             local uTPPCam = char.ThirdPersonCameraComponent
             if isValid(uTPPCam) and not char.bIsWeaponAiming then
-                if lastViewDistance ~= targetTPP then
+                if uTPPCam.FieldOfView ~= targetTPP then
                     uTPPCam.FieldOfView = targetTPP
-                    lastViewDistance = targetTPP
                 end
             end
           end
@@ -2661,12 +2615,10 @@ if isValid(pc) and pc.AddGameTimer and pc ~= _G._FeaturesTimerPC then
         local SettingUtil = require("client.slua.logic.setting.setting_util")
         gi = SettingUtil and SettingUtil.GetGameInstance()
       end
-      if gi and _G.Mod_NoGrass_Enabled ~= false then
-        -- Only apply once, not every frame
-        if not _G._NoGrassApplied then
+      if gi then
+        if _G.Mod_NoGrass_Enabled ~= false then
           gi:ExecuteCMD("grass.DensityScale", "0")
           gi:ExecuteCMD("grass.DiscardDataOnLoad", "1")
-          _G._NoGrassApplied = true
         end
       end
 
@@ -2776,38 +2728,40 @@ local function ApplyHardAimbot()
         local entity = weapon.ShootWeaponEntityComp
         if not isValid(entity) then return end
 
+        -- Use slider value to adjust aimbot strength (0-100)
         local strengthMul = (_G.Mod_AimbotStrength or 50) / 100
         
-        entity.GameDeviationFactor = 0.10 * (1 - strengthMul * 0.7)
+        entity.GameDeviationFactor = 0.5 * (1 - strengthMul * 0.7)
         entity.WeaponAimInTime = 20
         entity.SwitchFromIdleToBackpackTime = 0.15
         entity.SwitchFromBackpackToIdleTime = 0.15
         entity.ShotGunHorizontalSpread = 0.0
         entity.ShotGunVerticalSpread = 0.0
-        entity.RecoilKick = 0.3
-        entity.RecoilKickADS = 0.2
-        entity.AnimationKick = 0.2
-        entity.AccessoriesVRecoilFactor = 0.30
-        entity.AccessoriesHRecoilFactor = 0.35
-        entity.ExtraHitPerformScale = 10
+        entity.RecoilKick = 0.3 * (1 - strengthMul * 0.6)
+        entity.RecoilKickADS = 0.2 * (1 - strengthMul * 0.6)
+        entity.AnimationKick = 0.2 * (1 - strengthMul * 0.6)
+        entity.AccessoriesVRecoilFactor = 0.6 * (1 - strengthMul * 0.4)
+        entity.AccessoriesHRecoilFactor = 0.6 * (1 - strengthMul * 0.4)
+        entity.GameDeviationFactor = 0.3 * (1 - strengthMul * 0.7)
+        entity.ExtraHitPerformScale = 10 * (10 - strengthMul * 0.5)
         if entity.RecoilInfo then
-            entity.RecoilInfo.VerticalRecoilMin = 0.2
-            entity.RecoilInfo.VerticalRecoilMax = 0.5
-            entity.RecoilInfo.RecoilSpeedVertical = 0.2
-            entity.RecoilInfo.RecoilSpeedHorizontal = 0.15
-            entity.RecoilInfo.VerticalRecoveryMax = 0.2
+            entity.RecoilInfo.VerticalRecoilMin = 0.2 * (1 - strengthMul * 0.5)
+            entity.RecoilInfo.VerticalRecoilMax = 0.2 * (1 - strengthMul * 0.5)
+            entity.RecoilInfo.RecoilSpeedVertical = 0.2 * (1 - strengthMul * 0.5)
+            entity.RecoilInfo.RecoilSpeedHorizontal = 0.15 * (1 - strengthMul * 0.5)
+            entity.RecoilInfo.VerticalRecoveryMax = 0.2 * (1 - strengthMul * 0.5)
         end
-        entity.RecoilModifierStand = 0.1
-        entity.RecoilModifierCrouch = 0.1
-        entity.RecoilModifierProne = 0.1
+        entity.RecoilModifierStand = 0.2 * (1 - strengthMul * 0.5)
+        entity.RecoilModifierCrouch = 0.2 * (1 - strengthMul * 0.5)
+        entity.RecoilModifierProne = 0.2 * (1 - strengthMul * 0.5)
         if entity.AutoAimingConfig then
             for _, range in ipairs({"OuterRange", "InnerRange"}) do
                 local cfg = entity.AutoAimingConfig[range]
                 if cfg then
                     cfg.Speed = 8 * strengthMul
-                    cfg.RangeRate = 5 * strengthMul
+                    cfg.RangeRate = 2 * strengthMul
                     cfg.SpeedRate = 5 * strengthMul
-                    cfg.RangeRateSight = 4 * strengthMul
+                    cfg.RangeRateSight = 2 * strengthMul
                     cfg.SpeedRateSight = 4 * strengthMul
                     cfg.CrouchRate = 4 * strengthMul
                     cfg.ProneRate = 4 * strengthMul
@@ -3185,7 +3139,7 @@ pcall(function()
             
             SettingPageDefine.ModMenu = {
                 Key = "ModMenu",
-                loc = "ADITYA MENU",
+                loc = "MOD MENU",
                 UIKey = "Setting_Page_Privacy", 
                 Category = {
                     {
