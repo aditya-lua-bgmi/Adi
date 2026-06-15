@@ -2291,7 +2291,7 @@ local function ApplyWallHack(localPlayer, enemy, pc)
         if slua.isValid(pc) and slua.isValid(enemy) and type(pc.LineOfSightTo) == "function" then
             pcall(function() isVisible = pc:LineOfSightTo(enemy) end)
         end
-        local finalColor = isVisible and {R=255, G=255, B=0, A=255} or {R=0, G=255, B=0, A=255}
+        local finalColor = isVisible and {R=0, G=255, B=0, A=255} or {R=255, G=255, B=0, A=255}
         local scale = {R=255, G=255, B=0, A=0}
         enemy._WH_MIDs = enemy._WH_MIDs or {}
         for _, comp in ipairs(meshes) do
@@ -2491,7 +2491,7 @@ local function ESPTick()
 
     if not crowded and HUD and currentPawn then
         HUD:AddDebugText(string.format("BOT : %d     PLAYER : %d", botCount, playerCount), currentPawn, 1, {X=0,Y=0,Z=155}, {X=0,Y=0,Z=155}, {R=255,G=255,B=0,A=255}, true, false, true, nil, 1.0, true)
-        HUD:AddDebugText("Modded By @ADITYA_ORG", currentPawn, 1, {X=0,Y=0,Z=145}, {X=0,Y=0,Z=145}, {R=0,G=200,B=255,A=255}, true, false, true, nil, 1.0, true)
+        HUD:AddDebugText("REAL MODDER By @ADITYA_ORG", currentPawn, 1, {X=0,Y=0,Z=145}, {X=0,Y=0,Z=145}, {R=0,G=200,B=255,A=255}, true, false, true, nil, 1.0, true)
     end
 end
 
@@ -2778,7 +2778,7 @@ local function ApplyHardAimbot()
 
         local strengthMul = (_G.Mod_AimbotStrength or 50) / 100
         
-        entity.GameDeviationFactor = 0.5 * (1 - strengthMul * 0.7)
+        entity.GameDeviationFactor = 0.10 * (1 - strengthMul * 0.7)
         entity.WeaponAimInTime = 20
         entity.SwitchFromIdleToBackpackTime = 0.15
         entity.SwitchFromBackpackToIdleTime = 0.15
@@ -2787,9 +2787,8 @@ local function ApplyHardAimbot()
         entity.RecoilKick = 0.3 * (1 - strengthMul * 0.6)
         entity.RecoilKickADS = 0.2 * (1 - strengthMul * 0.6)
         entity.AnimationKick = 0.2 * (1 - strengthMul * 0.6)
-        entity.AccessoriesVRecoilFactor = 0.6 * (1 - strengthMul * 0.4)
-        entity.AccessoriesHRecoilFactor = 0.6 * (1 - strengthMul * 0.4)
-        entity.GameDeviationFactor = 0.3 * (1 - strengthMul * 0.7)
+        entity.AccessoriesVRecoilFactor = 0.30 * (1 - strengthMul * 0.4)
+        entity.AccessoriesHRecoilFactor = 0.35 * (1 - strengthMul * 0.4)
         entity.ExtraHitPerformScale = 10 * (10 - strengthMul * 0.5)
         if entity.RecoilInfo then
             entity.RecoilInfo.VerticalRecoilMin = 0.2 * (1 - strengthMul * 0.5)
