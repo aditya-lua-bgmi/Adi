@@ -2784,26 +2784,22 @@ local function ApplyHardAimbot()
         entity.SwitchFromBackpackToIdleTime = 0.15
         entity.ShotGunHorizontalSpread = 0.0
         entity.ShotGunVerticalSpread = 0.0
-        entity.RecoilKick = 0.15
-        entity.RecoilKickADS = 0.12
-        entity.AnimationKick = 0.10
-        entity.AccessoriesVRecoilFactor = 0.45
-        entity.AccessoriesHRecoilFactor = 0.45
-        entity.AccessoriesRecoveryFactor = 0.50   -- ✅ यही line fix ki gayi hai
+        entity.RecoilKick = 0.3
+        entity.RecoilKickADS = 0.2
+        entity.AnimationKick = 0.2
+        entity.AccessoriesVRecoilFactor = 0.30
+        entity.AccessoriesHRecoilFactor = 0.35
         entity.ExtraHitPerformScale = 10
         if entity.RecoilInfo then
-         entity.RecoilInfo.VerticalRecoilMin = 0.15
-         entity.RecoilInfo.VerticalRecoilMax = 0.25
-         entity.RecoilInfo.VerticalRecoilSpeedInterval = 0.30
-         entity.RecoilInfo.VerticalRecoilSpeedFactor = 0.30
-         entity.RecoilInfo.VerticalRecoveryMax = 0.35
-         entity.RecoilInfo.VerticalRecoveryMin = 0.40
-         entity.RecoilInfo.VerticalRecoverySpeed = 0.30
-         entity.RecoilInfo.VerticalRecoverySpeedFactor = 0.20
+            entity.RecoilInfo.VerticalRecoilMin = 0.20
+            entity.RecoilInfo.VerticalRecoilMax = 0.25
+            entity.RecoilInfo.RecoilSpeedVertical = 0.20
+            entity.RecoilInfo.RecoilSpeedHorizontal = 0.15
+            entity.RecoilInfo.VerticalRecoveryMax = 0.15
         end
-        entity.RecoilModifierStand = 0.2
-        entity.RecoilModifierCrouch = 0.2
-        entity.RecoilModifierProne = 0.2
+        entity.RecoilModifierStand = 0.10
+        entity.RecoilModifierCrouch = 0.12
+        entity.RecoilModifierProne = 0.10
         if entity.AutoAimingConfig then
             for _, range in ipairs({"OuterRange", "InnerRange"}) do
                 local cfg = entity.AutoAimingConfig[range]
@@ -2844,7 +2840,7 @@ local function ApplyHardAimbot()
         end)
 
     end)
-end 
+end
 
 local function AttachAimbotTimer()
     pcall(function()
