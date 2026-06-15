@@ -2291,8 +2291,8 @@ local function ApplyWallHack(localPlayer, enemy, pc)
         if slua.isValid(pc) and slua.isValid(enemy) and type(pc.LineOfSightTo) == "function" then
             pcall(function() isVisible = pc:LineOfSightTo(enemy) end)
         end
-        local finalColor = isVisible and {R=1,G=25,B=25,A=1} or {R=25,G=1,B=25,A=1}
-        local scale = {R=3,G=3,B=0,A=0}
+        local finalColor = isVisible and {R=255, G=255, B=0, A=255} or {R=0, G=255, B=0, A=255}
+        local scale = {R=255, G=255, B=0, A=0}
         enemy._WH_MIDs = enemy._WH_MIDs or {}
         for _, comp in ipairs(meshes) do
             if slua.isValid(comp) then
