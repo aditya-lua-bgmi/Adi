@@ -28,7 +28,7 @@ if not _G.Mod_Wallhack_Enabled then _G.Mod_Wallhack_Enabled = false end
 if not _G.Mod_Skin_Enabled then _G.Mod_Skin_Enabled = false end
 if _G.Mod_FPS165_Enabled == nil then _G.Mod_FPS165_Enabled = true end
 if _G.Mod_NoGrass_Enabled == nil then _G.Mod_NoGrass_Enabled = true end
-if _G.Mod_iPadView_Enabled == nil then _G.Mod_iPadView_Enabled = true end
+if _G.Mod_iPadView_Enabled == nil then _G.Mod_iPadView_Enabled = false end
 
 -- Slider values for fine-tuning
 if _G.Mod_AimbotStrength == nil then _G.Mod_AimbotStrength = 50 end
@@ -3186,7 +3186,7 @@ pcall(function()
             
             SettingPageDefine.ModMenu = {
                 Key = "ModMenu",
-                loc = "MOD MENU",
+                loc = "ADITYA MENU",
                 UIKey = "Setting_Page_Privacy", 
                 Category = {
                     {
